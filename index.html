@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#163b34">
+  <title>Skattejakt Simulator </title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Skattejakt Simulator hjem"><span class="brand-mark">✦</span><span>SKATTEJAKT SIMULATOR</span></a>
+      <div class="topbar-right">
+        <button class="icon-button" id="bag-button" type="button" aria-label="Åpne ryggsekken" title="Ryggsekk (B)"><span>🎒</span><small id="bag-count">0</small></button>
+        <button class="icon-button" id="book-button" type="button" aria-label="Åpne Skatteboka" title="Skattebok"><span>📖</span><small id="book-count">0/16</small></button>
+        <button class="icon-button" id="style-button" type="button" aria-label="Åpne garderoben" title="Garderobe"><span>🧢</span></button>
+        <div class="wallet"><span>◉</span><strong id="coin-count">80</strong><small>mynter</small></div>
+        <div class="level-pill"><span>LVL</span><strong id="level-count">1</strong><div class="xp-track"><span id="xp-fill"></span></div><small id="xp-text">0 XP</small></div>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="welcome-row">
+        <div>
+          <p class="eyebrow">ET ÅPENT RPG-EVENTYR</p>
+          <h1>Skattejakt <span>Simulator</span></h1>
+          <p class="welcome-copy">Utforsk verden i ditt eget tempo.</p>
+        </div>
+      </section>
+
+      <section class="game-layout" aria-label="Skattejakt-spill">
+        <div class="play-column">
+          <div class="game-frame">
+            <div class="game-hud">
+              <div class="hud-tag"><span class="hud-dot"></span><span id="game-state">LOBBY</span></div>
+              <div class="hud-center"><span id="realm-name">Eventyrerlobbyen</span><span class="hud-divider">/</span><span id="objective">Velg en verden å utforske</span></div>
+              <div class="health-box"><small>HP</small><div id="hp-hearts" aria-label="Helse"></div></div>
+              <div class="hud-score"><small>POENG</small><strong id="score-count">0</strong></div>
+              <div class="hud-record"><small>REKORD</small><strong id="highscore-count">0</strong></div>
+            </div>
+            <div class="zone-warning hidden" id="zone-warning" role="status"><strong id="zone-warning-title"></strong><span id="zone-warning-text"></span></div>
+            <canvas id="game-canvas" width="960" height="560" aria-label="Spillkart. Bruk WASD eller piltastene for å gå."></canvas>
+            <div class="canvas-bottom">
+              <div class="compass-readout"><span>⌖</span><span id="tracker-text">Skattene venter på deg</span></div>
+              <div class="chest-counter"><span>♧</span><strong id="chest-count">0 / 0</strong></div>
+            </div>
+            <div class="touch-controls" aria-label="Berøringskontroller">
+              <button class="touch-key up" data-key="ArrowUp" aria-label="Gå opp">▲</button>
+              <button class="touch-key left" data-key="ArrowLeft" aria-label="Gå til venstre">◀</button>
+              <button class="touch-key down" data-key="ArrowDown" aria-label="Gå ned">▼</button>
+              <button class="touch-key right" data-key="ArrowRight" aria-label="Gå til høyre">▶</button>
+            </div>
+            <div class="touch-actions" aria-label="Spillhandlinger">
+              <button type="button" data-action="interact">E<br><small>åpne</small></button>
+              <button type="button" data-action="attack">⚔<br><small>slå</small></button>
+              <button type="button" data-action="shoot">F<br><small>skyt</small></button>
+              <button type="button" data-action="cocoa">Q<br><small>drikk</small></button>
+            </div>
+          </div>
+
+          <div class="control-strip">
+            <div class="control-hint"><kbd>W A S D</kbd><span>eller</span><kbd>↑ ↓ ← →</kbd><span>gå rundt</span></div>
+            <div class="control-hint"><kbd>E</kbd><span>bruk</span><kbd>SPACE</kbd><span>angrep</span><kbd>F</kbd><span>sprettert</span><kbd>Q</kbd><span>kakao/vann</span></div>
+            <button class="sound-toggle" id="sound-toggle" type="button" aria-label="Slå av lyder">♫ <span>LYD PÅ</span></button>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="npc-proximity hidden" id="npc-proximity" aria-live="polite"><strong id="proximity-icon">!</strong><span id="proximity-text"></span></div>
+  <section class="npc-dialogue hidden" id="npc-dialogue" role="dialog" aria-modal="false" aria-labelledby="dialogue-name">
+    <div class="dialogue-heading"><span class="dialogue-person" id="dialogue-avatar">🧑🏻</span><strong id="dialogue-name">Milo</strong><button class="dialogue-close" id="dialogue-close" type="button" aria-label="Avslutt samtalen">×</button></div>
+    <p id="dialogue-text"></p>
+    <small id="dialogue-hint">E / MELLOMROM · FORTSETT</small>
+  </section>
+  <aside class="dialogue-options hidden" id="dialogue-options" aria-label="Samtalevalg"></aside>
+  <div class="dialog-backdrop hidden" id="bag-dialog" role="dialog" aria-modal="true" aria-labelledby="bag-title">
+    <div class="result-card collection-card">
+      <button class="modal-close" id="bag-close" type="button" aria-label="Lukk ryggsekken">×</button>
+      <span class="result-emoji">🎒</span><p class="eyebrow">DET DU HAR FUNNET</p><h2 id="bag-title">Ryggsekken</h2>
+      <p class="collection-summary" id="bag-summary">Sekken er tom.</p>
+      <div class="collection-grid" id="bag-grid"></div>
+      <button class="primary-button sell-button" id="sell-all" type="button">Selg alle gjenstandene <span>◉</span></button>
+    </div>
+  </div>
+  <div class="dialog-backdrop hidden" id="book-dialog" role="dialog" aria-modal="true" aria-labelledby="book-title">
+    <div class="result-card collection-card book-card">
+      <button class="modal-close" id="book-close" type="button" aria-label="Lukk Skatteboka">×</button>
+      <span class="result-emoji">📖</span><p class="eyebrow">SAMLE OG OPPDAG</p><h2 id="book-title">Skatteboka</h2>
+      <p class="collection-summary" id="book-summary">0 av 16 skatter oppdaget</p>
+      <div class="book-filters"><button class="active" data-filter="all" type="button">Alle</button><button data-filter="Common" type="button">Common</button><button data-filter="Rare" type="button">Rare</button><button data-filter="Epic" type="button">Epic</button><button data-filter="Legendary" type="button">Legendary</button></div>
+      <div class="collection-grid book-grid" id="book-grid"></div>
+    </div>
+  </div>
+  <div class="dialog-backdrop hidden" id="shop-dialog" role="dialog" aria-modal="true" aria-labelledby="shop-title">
+    <div class="result-card shop-card">
+      <button class="modal-close" id="shop-close" type="button" aria-label="Lukk butikken">×</button>
+      <span class="result-emoji">🛖</span><p class="eyebrow">VELKOMMEN INN</p><h2 id="shop-title">Utstyrsbua</h2>
+      <p>Velg utstyr eller finn noe nytt å ha på deg.</p>
+      <div class="shop-tabs"><button class="active" data-shop-tab="gear" type="button">Utstyr</button><button data-shop-tab="upgrades" type="button">Oppgraderinger</button></div>
+      <div class="shop-products" id="shop-products"></div>
+      <div class="inventory-line"><span>Utstyr:</span><strong id="shop-inventory">Tom sekk</strong></div>
+    </div>
+  </div>
+  <div class="dialog-backdrop hidden" id="style-dialog" role="dialog" aria-modal="true" aria-labelledby="style-title">
+    <div class="result-card collection-card style-card">
+      <button class="modal-close" id="style-close" type="button" aria-label="Lukk garderoben">×</button>
+      <span class="result-emoji">🧢</span><p class="eyebrow">KLESBUTIKKEN</p><h2 id="style-title">Garderobe</h2>
+      <p class="collection-summary" id="style-summary">Velg en gjenstand for å se den på figuren.</p>
+      <div class="style-preview-row">
+        <figure><canvas id="preview-current" width="120" height="150"></canvas><figcaption>NÅ</figcaption></figure>
+        <span class="preview-arrow">→</span>
+        <figure><canvas id="preview-try" width="120" height="150"></canvas><figcaption id="preview-try-label">PRØVER</figcaption></figure>
+      </div>
+      <div class="style-tabs"><button class="active" data-style-tab="hat" type="button">Hatter</button><button data-style-tab="outfit" type="button">Antrekk</button></div>
+      <div class="collection-grid" id="style-grid"></div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
